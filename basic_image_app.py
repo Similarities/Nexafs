@@ -45,6 +45,23 @@ class ImageStackMeanValue:
         return self.result
 
 
+class ImageSumOverStack:
+
+    def __init__(self, file_list, file_path):
+        self.file_list = file_list
+        self.file_path = file_path
+        self.result = np.zeros([2052, 2048])
+
+    def sum_stack(self):
+        for x in self.file_list:
+            x = str(self.file_path + '/' + x)
+            picture_x = read_image(x)
+            picture_x = convert_32_bit(picture_x)
+            self.result = self.result + picture_x
+
+        return self.result, len(self.file_list)
+
+
 class SingleImageOpen:
     def __init__(self, file_name, file_path):
         self.file_name = file_name
