@@ -15,7 +15,7 @@ class CalibrationFit:
 
     def fit_refernce_points(self):
         fit_parameter = np.polyfit(self.reference_points[:, 1], self.reference_points[:, 0], self.order)
-        np.savetxt(self.name + "_poly_fit" + ".txt", fit_parameter, fmt='%.3E', delimiter='\t')
+        np.savetxt(self.name + "_quadratic_fit" + ".txt", fit_parameter, fmt='%.3E', delimiter='\t')
         return fit_parameter
 
 
@@ -27,12 +27,11 @@ class CalibrationFit:
 
 
     def compare_fit(self):
-        #x_axis = np.linspace(np.min(self.reference_points[:, 1]), np.max(self.reference_points[:, 1]),2548)
         x_axis = np.linspace(0, 2048, 2048)
-        #fit_y = np.linspace(np.min(self.reference_points[:, 1]), np.max(self.reference_points[:, 1]), 2048)
         fit_y = np.linspace(0, 2048,2048)
         for counter, value in enumerate(x_axis):
-            fit_y[counter] = self.poly_coefficients[-1] + self.poly_coefficients[-2] * x_axis[counter]
+            fit_y[counter] = self.poly_coefficients[-1] + self.poly_coefficients[-2] * x_axis[counter] \
+                             +self.poly_coefficients[-3] * x_axis[counter] **2
         plt.figure(1)
         plt.scatter(self.reference_points[:, 1], self.reference_points[:, 0])
         plt.plot(x_axis, fit_y)
@@ -45,7 +44,7 @@ reference_px = basic_file_app.load_1d_array(reference_path, 1, 2)
 reference_points = basic_file_app.stack_arrays(reference_eV, reference_px, 1)
 print(reference_points)
 
-Test_Ni = CalibrationFit(reference_points, 1, "S3_Ni_20210412")
+Test_Ni = CalibrationFit(reference_points, 2, "S3_Ni_20210412")
 Test_Ni.fit_reciproce()
 Test_Ni.compare_fit()
 print(Test_Ni.give_fit())

@@ -71,22 +71,21 @@ class ImagePreProcessing:
         plt.legend()
 
 
-    def prepare_header(self, description1, description2):
+    def prepare_header(self, description1):
         # insert header line and change index
-        result = np.column_stack((self.x_axis_nm, self.x_axis_eV, self.binned_roi_y))
-        self.spectral_range()
-        header_names = (['nm', 'eV', 'counts/s'])
-        names = (['file' + str(self.filename), 'back:' + str(self.background_name), 'roi list:' + str(self.roi_list)])
+        result = np.column_stack((self.x_axis_px, self.binned_roi_y))
+        header_names = (['px', 'counts/s'])
+        names = (['file' + str(self.filename), 'roi list:' + str(self.roi_list)])
         parameter_info = (
-            ['description:', description1, description2])
+            ['description:', description1])
         return np.vstack((parameter_info, names, header_names, result))
 
-    def save_data(self, description1, description2):
-        result = self.prepare_header(description1, description2)
+    def save_data(self, description1):
+        result = self.prepare_header(description1)
         print('...saving:', self.filename[:-4])
-        plt.figure(7)
+        plt.figure(3)
         plt.savefig(self.filename[:-4] + ".png", bbox_inches="tight", dpi=500)
-        np.savetxt(self.filename[:-4] + '_calibrated_analytical' + ".txt", result, delimiter=' ',
+        np.savetxt(self.filename[:-4] + '_stack_pre_processing' + ".txt", result, delimiter=' ',
                    header='string', comments='',
                    fmt='%s')
 
@@ -104,7 +103,7 @@ class ImagePreProcessing:
         plt.colorbar()
 
 
-path_background = "data/straylight_985ms_Ni/"
+path_background = "data/20210419/straylight_985ms_high_gain/"
 name_background = path_background
 
 laser_gate_time_data = 985  # ms
@@ -115,12 +114,9 @@ file_list_background = basic_image_app.get_file_list(path_background)
 batch_background = basic_image_app.ImageStackMeanValue(file_list_background, path_background)
 my_background = batch_background.average_stack()
 
-my_second_background_path = "data/back_2s_gauge_on/"
-file_list_second_back = basic_image_app.get_file_list(my_second_background_path)
-batch_second_background = basic_image_app.ImageStackMeanValue(file_list_second_back, my_second_background_path)
-my_second_background = batch_second_background.average_stack()
 
-path_picture = "data/985ms_Ni_raw/"
+
+path_picture = "data/20210419/SiN_985ms_raw/"
 file_list_raws = basic_image_app.get_file_list(path_picture)
 
 open_stack_raws = basic_image_app.ImageSumOverStack(file_list_raws, path_picture)
@@ -130,46 +126,16 @@ open_stack_raws_2 = basic_image_app.ImageStackMeanValue(file_list_raws, path_pic
 my_avg_picture = open_stack_raws_2.average_stack()
 
 # roi on image ( [x1, y1, x2, y2])
-roi_list = ([0, 852, 2048, 1528])
+roi_list = ([0, 575, 2048, 1359])
 
-scaled_straylight_correction = ImagePreProcessing(my_summed_stack, path_picture[:-4], my_background, "stray light")
-scaled_straylight_correction.reference_scaling()  #
-scaled_straylight_correction.background_subtraction()
-# scaled_straylight_correction.view_control()
-scaled_straylight_correction.another_background_substraction(my_second_background, "dark ")
-scaled_straylight_correction.correct_for_stack_number(number_in_stack)
-
-scaled_straylight_correction.bin_in_y(roi_list)
-scaled_straylight_correction.plot_binned_picture("straylight + dark sum avg")
-
-scaled_straylight_correction = ImagePreProcessing(my_avg_picture, path_picture[:-4], my_background, "stray light")
+scaled_straylight_correction = ImagePreProcessing(my_avg_picture, path_picture, my_background, "straylight")
 scaled_straylight_correction.reference_scaling()  #
 scaled_straylight_correction.background_subtraction()
 scaled_straylight_correction.view_control()
 
-scaled_straylight_correction.another_background_substraction(my_second_background, "dark ")
-
 scaled_straylight_correction.bin_in_y(roi_list)
-scaled_straylight_correction.plot_binned_picture("straylight + dark avg")
+scaled_straylight_correction.plot_binned_picture("straylight")
 
-scaled_straylight_correction = ImagePreProcessing(my_summed_stack, path_picture[:-4], my_second_background, "dark")
-scaled_straylight_correction.reference_scaling()  #
-scaled_straylight_correction.background_subtraction()
-# scaled_straylight_correction.view_control()
-scaled_straylight_correction.another_background_substraction(my_background, "stray light")
-scaled_straylight_correction.correct_for_stack_number(number_in_stack)
-
-scaled_straylight_correction.bin_in_y(roi_list)
-scaled_straylight_correction.plot_binned_picture("dark + straylight + sum avg")
-
-scaled_straylight_correction = ImagePreProcessing(my_avg_picture, path_picture[:-4], my_second_background, "dark")
-scaled_straylight_correction.reference_scaling()  #
-scaled_straylight_correction.background_subtraction()
-scaled_straylight_correction.view_control()
-
-scaled_straylight_correction.another_background_substraction(my_background, "stay light")
-
-scaled_straylight_correction.bin_in_y(roi_list)
-scaled_straylight_correction.plot_binned_picture(" dark straylight avg")
+scaled_straylight_correction.save_data("straylight_corrected")
 
 plt.show()
