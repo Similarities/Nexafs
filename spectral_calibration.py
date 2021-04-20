@@ -55,7 +55,7 @@ class CalibrateSpectrum:
 
 
 
-input_file = "data/SiN_985ms__stack_pre_processing.txt"
+input_file = "data/985ms_Ni_stack_pre_processing.txt"
 counts_input = basic_file_app.load_1d_array(input_file, 1, 4)
 
 input_calibration = "data/S3_Ni_20210412_quadratic_fit.txt"
@@ -66,12 +66,12 @@ fit_points = "data/S3_20210412_reference.txt"
 reference_points = basic_file_app.load_1d_array(fit_points, 0,2)
 
 
-calibrate_Ni = CalibrateSpectrum(counts_input, fit, "20210419_SiN_high_S3")
+calibrate_Ni = CalibrateSpectrum(counts_input, fit, "20210414_Ni_S3_low")
 # px_shift
-calibrate_Ni.calibrate_x_axis(6)
+calibrate_Ni.calibrate_x_axis(14)
 calibrate_Ni.reference_points(reference_points)
 plt.xlim(700, 900)
 #plt.ylim(0.E6, 1.E6)
-calibrate_Ni.save_data("20210414_cal_SiN_S3_high")
+calibrate_Ni.save_data("20210414_cal_Ni_S3_low")
 
 plt.show()

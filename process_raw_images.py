@@ -103,7 +103,7 @@ class ImagePreProcessing:
         plt.colorbar()
 
 
-path_background = "data/20210419/straylight_985ms_high_gain/"
+path_background = "data/straylight_985ms_Ni"
 name_background = path_background
 
 laser_gate_time_data = 985  # ms
@@ -116,7 +116,7 @@ my_background = batch_background.average_stack()
 
 
 
-path_picture = "data/20210419/SiN_985ms_raw/"
+path_picture = "data/985ms_Ni_raw"
 file_list_raws = basic_image_app.get_file_list(path_picture)
 
 open_stack_raws = basic_image_app.ImageSumOverStack(file_list_raws, path_picture)
