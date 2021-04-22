@@ -60,16 +60,17 @@ class ImagePreProcessing:
         self.binned_roi_y = np.sum(self.picture[self.roi_list[1]:self.roi_list[-1], self.roi_list[0]: self.roi_list[2]],
                                    axis=0)
         self.x_axis_px = np.arange(0, self.roi_list[2] - self.roi_list[0]).astype(np.float32)
+        return self.binned_roi_y, self.x_axis_px, self.roi_list
+
+    def plot_cleaned_roi(self):
         plt.figure(3)
         plt.imshow(self.picture[self.roi_list[1]:self.roi_list[-1], self.roi_list[0]: self.roi_list[2]])
         plt.colorbar()
-        return self.binned_roi_y, self.x_axis_px, self.roi_list
 
     def plot_binned_picture(self, name):
         plt.figure(4)
         plt.plot(self.x_axis_px, self.binned_roi_y, label=name)
         plt.legend()
-
 
     def prepare_header(self, description1):
         # insert header line and change index
@@ -83,9 +84,9 @@ class ImagePreProcessing:
     def save_data(self, description1):
         result = self.prepare_header(description1)
         print('...saving:', self.filename[:-4])
-        plt.figure(3)
+        plt.figure(4)
         plt.savefig(self.filename[:-4] + ".png", bbox_inches="tight", dpi=500)
-        np.savetxt(self.filename[:-4] + '_stack_pre_processing' + ".txt", result, delimiter=' ',
+        np.savetxt(self.filename[:-4] + '_stack_processing_test' + ".txt", result, delimiter=' ',
                    header='string', comments='',
                    fmt='%s')
 
@@ -103,7 +104,7 @@ class ImagePreProcessing:
         plt.colorbar()
 
 
-path_background = "data/straylight_985ms_Ni"
+path_background = "data/straylight_985ms_low_gain_19/"
 name_background = path_background
 
 laser_gate_time_data = 985  # ms
@@ -114,9 +115,7 @@ file_list_background = basic_image_app.get_file_list(path_background)
 batch_background = basic_image_app.ImageStackMeanValue(file_list_background, path_background)
 my_background = batch_background.average_stack()
 
-
-
-path_picture = "data/985ms_Ni_raw"
+path_picture = "data/S2_985ms_Ni_raw/"
 file_list_raws = basic_image_app.get_file_list(path_picture)
 
 open_stack_raws = basic_image_app.ImageSumOverStack(file_list_raws, path_picture)
@@ -126,16 +125,16 @@ open_stack_raws_2 = basic_image_app.ImageStackMeanValue(file_list_raws, path_pic
 my_avg_picture = open_stack_raws_2.average_stack()
 
 # roi on image ( [x1, y1, x2, y2])
-roi_list = ([0, 575, 2048, 1359])
+roi_list = ([0, 516, 2048, 1359])
 
-scaled_straylight_correction = ImagePreProcessing(my_avg_picture, path_picture, my_background, "straylight")
+scaled_straylight_correction = ImagePreProcessing(my_avg_picture, path_picture, my_background, "straylightxx")
 scaled_straylight_correction.reference_scaling()  #
 scaled_straylight_correction.background_subtraction()
 scaled_straylight_correction.view_control()
 
 scaled_straylight_correction.bin_in_y(roi_list)
-scaled_straylight_correction.plot_binned_picture("straylight")
+scaled_straylight_correction.plot_binned_picture("straylightxxx")
 
-scaled_straylight_correction.save_data("straylight_corrected")
+scaled_straylight_correction.save_data("straylight_correctedxx")
 
 plt.show()

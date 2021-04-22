@@ -79,12 +79,12 @@ class OpticalDensity:
                    fmt='%s')
 
 
-reference_path = "data/calibrated/20210419_SiN_S3_calibration.txt"
+reference_path = "data/calibrated/20210419_SiN_S2_low_calibration.txt"
 reference_x = basic_file_app.load_1d_array(reference_path, 0, 4)
 reference_y = basic_file_app.load_1d_array(reference_path, 1, 4)
 reference = basic_file_app.stack_arrays(reference_x, reference_y, 1)
 
-sample_path = "data/calibrated/20210414_Ni_S3_low_calibration.txt"
+sample_path = "data/calibrated/20210414_Ni+SiN_S2_low_calibration.txt"
 sample_x = basic_file_app.load_1d_array(sample_path, 0, 4)
 sample_y = basic_file_app.load_1d_array(sample_path, 1, 4)
 sample = basic_file_app.stack_arrays(sample_x, sample_y, 1)
@@ -92,26 +92,26 @@ sample = basic_file_app.stack_arrays(sample_x, sample_y, 1)
 Test = OpticalDensity(reference, sample, "SiN_low", "Ni_low")
 Test.process_optical_density()
 Test.plot_result()
-# plt.ylim(-0.2, 2.5)
-# Test.save_data("20210414_20210419_Ni_SiN_optical_density_low_gain")
+#plt.ylim(-0.2, 2.5)
+#Test.save_data("20210414_20210419_Ni_SiN_optical_density_low_gain")
 
 
-NiO_sample_path = "data/calibrated/20210414_NiO_high_S3_calibration.txt"
+NiO_sample_path = "data/calibrated/test/20210414_Ni_S2_low2_calibration.txt"
 sample_x = basic_file_app.load_1d_array(NiO_sample_path, 0, 4)
 sample_y = basic_file_app.load_1d_array(NiO_sample_path, 1, 4)
 NiO_sample = basic_file_app.stack_arrays(sample_x, sample_y, 1)
 
-reference_path_2 = "data/calibrated/20210419_SiN_high_S3_calibration.txt"
+reference_path_2 = "data/calibrated/test/20210419_SiN_S2_low2_calibration.txt"
 reference_x_2 = basic_file_app.load_1d_array(reference_path_2, 0, 4)
 reference_y_2 = basic_file_app.load_1d_array(reference_path_2, 1, 4)
 reference_high = basic_file_app.stack_arrays(reference_x_2, reference_y_2, 1)
 
-HighGain = OpticalDensity(reference_high, NiO_sample, "SiN high gain", "NiO high gain")
+HighGain = OpticalDensity(reference_high, NiO_sample, "SiN high low2", "Ni low gain")
 HighGain.process_optical_density()
 plt.ylim(-0.3, 3)
-plt.xlim(700, 1150)
+
 plt.legend()
 HighGain.plot_result()
-HighGain.save_data("20210414_20210419_NiO_SiN_optical_density_high_gain")
+HighGain.save_data("20210414_20210419_S2_Nexafs_test")
 
 plt.show()
