@@ -38,13 +38,13 @@ class CalibrationFit:
         plt.plot()
 
 
-reference_path = "data/S2_reference_points_20210412.txt"
+reference_path = "data/S3_reference/S3_reference_Ni.txt"
 reference_eV= basic_file_app.load_1d_array(reference_path, 0, 2)
 reference_px = basic_file_app.load_1d_array(reference_path, 1, 2)
 reference_points = basic_file_app.stack_arrays(reference_eV, reference_px, 1)
 print(reference_points)
 
-Test_Ni = CalibrationFit(reference_points, 2, "S2_Ni+SiNi_20210412")
+Test_Ni = CalibrationFit(reference_points, 2, "S3_reference_fit20210412")
 Test_Ni.fit_reciproce()
 Test_Ni.compare_fit()
 print(Test_Ni.give_fit())

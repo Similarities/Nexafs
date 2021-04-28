@@ -20,7 +20,7 @@ class OpticalDensity:
     def shift_in_register(self):
         shift = self.reference[0, 0] - self.sample[0, 0]
         print(shift, 'shift')  #
-        start_index = 7
+        start_index =5
         shift_index = np.where(self.reference[:, 0] >= self.sample[start_index, 0])[0][0]
         print(shift_index, 'shift_index')
 
@@ -44,11 +44,17 @@ class OpticalDensity:
             self.result = np.zeros([len(self.resized_sample), 2])
             print(len(self.result))
 
+        elif shift == 0:
+            self.resized_reference = self.reference
+            self.resized_sample = self.sample
+            self.result = np.zeros([len(self.resized_sample), 2])
+
         return self.result, self.resized_sample, self.resized_reference
 
     def process_optical_density(self):
         self.scale_y()
         self.shift_in_register()
+        print(len(self.resized_sample), len(self.resized_reference))
         self.result[:, 1] = -np.log(self.resized_sample[:, 1] / self.resized_reference[:, 1])
         self.result[:, 0] = self.resized_sample[:, 0]
         return self.result
@@ -79,39 +85,26 @@ class OpticalDensity:
                    fmt='%s')
 
 
-reference_path = "data/calibrated/20210419_SiN_S2_low_calibration.txt"
+reference_path = "data/stack_105ms/calibrated/SiN single_wo_calibration.txt"
 reference_x = basic_file_app.load_1d_array(reference_path, 0, 4)
 reference_y = basic_file_app.load_1d_array(reference_path, 1, 4)
 reference = basic_file_app.stack_arrays(reference_x, reference_y, 1)
 
-sample_path = "data/calibrated/20210414_Ni+SiN_S2_low_calibration.txt"
+sample_path = "data/stack_105ms/calibrated/NiO single var 1_calibration.txt"
 sample_x = basic_file_app.load_1d_array(sample_path, 0, 4)
 sample_y = basic_file_app.load_1d_array(sample_path, 1, 4)
 sample = basic_file_app.stack_arrays(sample_x, sample_y, 1)
 
-Test = OpticalDensity(reference, sample, "SiN_low", "Ni_low")
+Test = OpticalDensity(reference, sample, "SiN", "NiO")
 Test.process_optical_density()
 Test.plot_result()
-#plt.ylim(-0.2, 2.5)
-#Test.save_data("20210414_20210419_Ni_SiN_optical_density_low_gain")
+plt.ylim(-0.2, 2.5)
+plt.xlim(850, 890)
+Test.save_data("S2_SiN_NiO_px_corrected_var1_with_wo")
 
 
-NiO_sample_path = "data/calibrated/test/20210414_Ni_S2_low2_calibration.txt"
-sample_x = basic_file_app.load_1d_array(NiO_sample_path, 0, 4)
-sample_y = basic_file_app.load_1d_array(NiO_sample_path, 1, 4)
-NiO_sample = basic_file_app.stack_arrays(sample_x, sample_y, 1)
-
-reference_path_2 = "data/calibrated/test/20210419_SiN_S2_low2_calibration.txt"
-reference_x_2 = basic_file_app.load_1d_array(reference_path_2, 0, 4)
-reference_y_2 = basic_file_app.load_1d_array(reference_path_2, 1, 4)
-reference_high = basic_file_app.stack_arrays(reference_x_2, reference_y_2, 1)
-
-HighGain = OpticalDensity(reference_high, NiO_sample, "SiN high low2", "Ni low gain")
-HighGain.process_optical_density()
-plt.ylim(-0.3, 3)
 
 plt.legend()
-HighGain.plot_result()
-HighGain.save_data("20210414_20210419_S2_Nexafs_test")
+
 
 plt.show()

@@ -55,23 +55,23 @@ class CalibrateSpectrum:
 
 
 
-input_file = "data/S2_985ms_Ni_stack_processing_test.txt"
+input_file = "data/stack_105ms/S3_NiO_px_corrected_105ms_avg_variant_1.txt"
 counts_input = basic_file_app.load_1d_array(input_file, 1, 4)
 
-input_calibration = "data/S2_Ni+SiNi_20210412_quadratic_fit.txt"
+input_calibration = "data/S3_reference/S3_reference_fit20210412_quadratic_fit.txt"
 fit = basic_file_app.load_1d_array(input_calibration, 0, 0)
 
 #reference in eV
-fit_points = "data/S2_reference_points_20210412.txt"
+fit_points = "data/S3_reference/S3_reference_Ni.txt"
 reference_points = basic_file_app.load_1d_array(fit_points, 0,2)
 
 
-calibrate_Ni = CalibrateSpectrum(counts_input, fit, "20210414_Ni_S2_low2")
+calibrate_Ni = CalibrateSpectrum(counts_input, fit, "NiO single var 1")
 # shift of spectrum to reference in [px]
-calibrate_Ni.calibrate_x_axis(15)
+calibrate_Ni.calibrate_x_axis(-3)
 calibrate_Ni.reference_points(reference_points)
-#plt.xlim(700, 900)
+plt.xlim(700, 900)
 #plt.ylim(0.E6, 1.E6)
-calibrate_Ni.save_data("20210414_cal_NiSiN_S2_low_2")
+calibrate_Ni.save_data("20210414_NiO_px_corrected_var1")
 
 plt.show()

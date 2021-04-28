@@ -7,6 +7,10 @@ def load_1d_array(file, column_1, skiprows):
     data = np.loadtxt(file, skiprows=skiprows, usecols=(column_1,))
     return data
 
+def load_2d_array(file, column_1, column_2, skiprows):
+    data_x = load_1d_array(file, column_1, skiprows)
+    data_y = load_1d_array(file, column_2, skiprows)
+    return stack_arrays(data_x, data_y, 1)
 
 def stack_arrays(array_1, array_2, axis):
     return np.stack((array_1, array_2), axis=axis)
