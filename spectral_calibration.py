@@ -1,70 +1,77 @@
-def calibrate_x_axis(self, fit_coefficients):
-    self.x_axis = np.linspace(0, 2048, 2048)
-    for counter, value in enumerate(self.x_axis):
-        self.x_axis[counter] = (fit_coefficients[0] * value ** 2) + fit_coefficients[1] * value + fit_coefficients[
-            2]
-    plt.figure(6)
-    plt.plot(self.x_axis, self.binned_roi_y, label=self.filename[:-4], marker=".")
-    plt.xlabel("nm")
-    plt.ylabel('counts')
-    return self.x_axis, self.binned_roi_y
+import basic_file_app
+import numpy as np
+import matplotlib.pyplot as plt
 
 
-def plot_x_axis_nm(self):
-    plt.figure(6)
-    plt.plot(self.x_axis_nm, self.binned_roi_y, label=self.filename[:-4] + "analytical", marker=".")
-    plt.xlabel("nm")
-    plt.ylabel("counts")
-    plt.legend()
+class CalibrateSpectrum:
+    def __init__(self, array, fit_parameter, name):
+        self.y_array = array
+        self.fit_coefficients = fit_parameter
+        self.name = name
+        self.nm_array = np.empty([])
+        self.ev_array = np.linspace(0, len(self.y_array), len(self.y_array))
+
+    def calibrate_x_axis(self, px_shift):
+        x_axis = np.linspace(0, len(self.y_array), len(self.y_array))
+        for counter, value in enumerate(x_axis):  # self.fit_coefficients[0] * value ** 2) +
+            self.ev_array[counter] = self.fit_coefficients[-2] * (value+px_shift) + self.fit_coefficients[-1] + self.fit_coefficients[-3] *((value+px_shift)**2)
+        self.plot_result_ev()
+        return self.ev_array
+
+    def plot_result_ev(self):
+        plt.figure(1)
+        plt.plot(self.ev_array, self.y_array, label=self.name[:-4], marker=".", ms=3)
+        plt.xlabel('eV')
+        plt.ylabel('counts/s')
+        plt.legend()
+
+    def spectral_range(self):
+        print(np.amax(self.ev_array), np.amin(self.ev_array), 'spectral range in eV')
+
+    def reference_points(self, list):
+
+        for x in list:
+            plt.figure(1)
+            plt.vlines(x =x, ymin = 0, ymax = np.amax(self.y_array))
 
 
-def plot_calibration_nm(self, lines):
-    for x in lines:
-        plt.figure(6)
-        plt.vlines(x, ymin=0, ymax=1E7)
+    def prepare_header(self, description1):
+        # insert header line and change index
+        result = np.column_stack((self.ev_array, self.y_array))
+        header_names = (['eV', 'counts/s'])
+        names = (['file' + str(self.name), 'fit: ' + str(self.fit_coefficients)])
+        parameter_info = (
+            ['description:', description1])
+        return np.vstack((parameter_info, names, header_names, result))
+
+    def save_data(self, description1):
+        result = self.prepare_header(description1)
+        print('...saving:', self.name)
+        plt.figure(1)
+        plt.savefig(self.name + ".png", bbox_inches="tight", dpi=500)
+        np.savetxt(self.name + '_calibration' + ".txt", result, delimiter=' ',
+                   header='string', comments='',
+                   fmt='%s')
 
 
-def plot_calibration_ev(self, lines, ymax, color):
-    for x in lines:
-        x = self.convert_single_value_nm_to_electron_volt(x)
-        plt.figure(7)
-        plt.vlines(x, ymin=0, ymax=ymax, linewidth=0.5, color=color)
+
+input_file = "data/stack_105ms/S3_NiO_px_corrected_105ms_avg_variant_1.txt"
+counts_input = basic_file_app.load_1d_array(input_file, 1, 4)
+
+input_calibration = "data/S3_reference/S3_reference_fit20210412_quadratic_fit.txt"
+fit = basic_file_app.load_1d_array(input_calibration, 0, 0)
+
+#reference in eV
+fit_points = "data/S3_reference/S3_reference_Ni.txt"
+reference_points = basic_file_app.load_1d_array(fit_points, 0,2)
 
 
-def plot_result_ev(self):
-    self.convert_array_nm_to_eV()
-    plt.figure(7)
-    plt.plot(self.x_axis_eV, self.binned_roi_y, label=self.filename[:-4], marker=".", ms=3)
-    plt.xlabel('eV')
-    plt.ylabel('counts')
-    plt.legend()
-    return self.x_axis_eV
+calibrate_Ni = CalibrateSpectrum(counts_input, fit, "NiO single var 1")
+# shift of spectrum to reference in [px]
+calibrate_Ni.calibrate_x_axis(-3)
+calibrate_Ni.reference_points(reference_points)
+plt.xlim(700, 900)
+#plt.ylim(0.E6, 1.E6)
+calibrate_Ni.save_data("20210414_NiO_px_corrected_var1")
 
-
-def convert_single_value_nm_to_electron_volt(self, value_nm):
-    planck_constant = 4.135667516 * 1E-15
-    c = 299792458
-    return planck_constant * c / (value_nm * 1E-9)
-
-
-def convert_array_nm_to_eV(self):
-    self.x_axis_eV = np.zeros([len(self.x_axis_nm)])
-    self.x_axis_eV[:] = self.convert_single_value_nm_to_electron_volt(self.x_axis_nm[:])
-    return self.x_axis_eV
-
-
-def spectral_range(self):
-    print(np.amax(self.x_axis_nm), np.amin(self.x_axis_nm), 'spectral range in nm')
-
-def scale_array_per_second(self, constant):
-        self.binned_roi_y = basic_file_app.constant_array_scaling(self.binned_roi_y, constant)
-        return self.binned_roi_y
-
-    def bin_in_y(self):
-        self.binned_roi_y = np.sum(self.picture[self.roi_list[1]:self.roi_list[-1], self.roi_list[0]: self.roi_list[2]],
-                                   axis=0)
-        self.x_axis_nm = np.arange(0, self.roi_list[2] - self.roi_list[0]).astype(np.float32)
-        plt.figure(3)
-        plt.imshow(self.picture[self.roi_list[1]:self.roi_list[-1], self.roi_list[0]: self.roi_list[2]])
-        plt.colorbar()
-        return self.binned_roi_y, self.x_axis_eV
+plt.show()
